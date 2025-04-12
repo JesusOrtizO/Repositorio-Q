@@ -8,7 +8,7 @@ st.title("📊 Reporte de Cursos No Concluidos por Departamento")
 @st.cache_data
 def cargar_datos(archivo):
     xls = pd.ExcelFile(archivo)
-    df = xls.parse('2024 Certificación Q - Colabora')  # Hoja del archivo de ejemplo
+    df = xls.parse(xls.sheet_names[0])  # Hoja del archivo de ejemplo
     columnas = [
         'Nombre_Colaborador', 'Puesto', 'Estatus', 'Dirección', 'Sucursal', 'Unidad_Negocio',
         'Estado', 'Jefe_Inmediato', 'Curso', 'Estado_Expediente',

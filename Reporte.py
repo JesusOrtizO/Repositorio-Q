@@ -1,47 +1,88 @@
 
-import pandas as pd
-import streamlit as st
+from openpyxl import Workbook
+from openpyxl.styles import Font, Alignment, PatternFill
+from openpyxl.drawing.image import Image
 
-st.set_page_config(page_title="Reporte de Cursos Pendientes", layout="wide")
-st.title("📊 Reporte de Cursos No Concluidos por Departamento")
+# Crear libro de Excel
+wb = Workbook()
+ws = wb.active
+ws.title = "Dashboard Dirección"
 
-@st.cache_data
-def cargar_datos(archivo):
-    xls = pd.ExcelFile(archivo)
-    df = xls.parse(xls.sheet_names[0])  # Hoja del archivo de ejemplo
-    columnas = [
-        'Nombre_Colaborador', 'Puesto', 'Estatus', 'Dirección', 'Sucursal', 'Unidad_Negocio',
-        'Estado', 'Jefe_Inmediato', 'Curso', 'Estado_Expediente',
-        'Correo', 'Jefe_Nombre', 'Extra1', 'Extra2', 'Fecha1', 'Fecha2'
-    ]
-    df.columns = columnas[:len(df.columns)]
-    return df
+# Estilos
+bold_font = Font(bold=True)
+header_font = Font(bold=True, color="FFFFFF")
+purple_fill = PatternFill("solid", fgColor="800080")
+center = Alignment(horizontal="center")
 
-archivo = st.file_uploader("Sube el archivo Excel de cursos:", type=["xlsx"])
+# Título
+ws.merge_cells('A1:D1')
+ws['A1'] = "CURSOS PENDIENTES POR DIRECCIÓN"
+ws['A1'].font = Font(bold=True, size=14)
+ws['A1'].alignment = center
 
-if archivo is not None:
-    df = cargar_datos(archivo)
-    df['Dirección'] = df['Dirección'].fillna('')
-    df['Estado_Expediente'] = df['Estado_Expediente'].fillna('')
+# Subtítulo
+ws.merge_cells('A2:D2')
+ws['A2'] = "DIRECCIÓN: Operaciones"
+ws['A2'].font = Font(bold=True)
+ws['A2'].alignment = center
 
-    departamentos_disponibles = df['Dirección'].dropna().unique()
-    departamento_objetivo = st.selectbox("Selecciona una Dirección a analizar:", sorted(departamentos_disponibles))
+# Fecha y total
+ws['F1'] = "16 de enero de 2025"
+ws['F1'].alignment = Alignment(horizontal="right")
+ws['F2'] = "Total pendientes"
+ws['F3'] = 6
+ws['F3'].font = Font(bold=True, size=14, color="FFFFFF")
+ws['F3'].fill = PatternFill("solid", fgColor="FF4D6D")
+ws['F3'].alignment = center
 
-    df_filtrado = df[
-        (df['Dirección'].str.upper() == departamento_objetivo.upper()) &
-        (~df['Estado_Expediente'].str.upper().isin(["TERMINADO", "CONCLUIDO"]))
-    ]
+# Tabla de cursos
+curso_data = [
+    ["Curso", "Pendientes", "% Pendientes"],
+    ["Política: Conflicto de Intereses 2024", 6, "100 %"],
+    ["Medidas de seguridad en el puesto de trabajo", 0, "0 %"],
+    ["PCI DSS VERSIÓN 4.0", 0, "0 %"],
+    ["Protección de Datos Personales 2024", 0, "0 %"]
+]
 
-    st.subheader(f"Resumen general para: {departamento_objetivo}")
-    st.metric(label="Total de cursos pendientes", value=df_filtrado.shape[0])
+start_row = 5
+for i, row in enumerate(curso_data):
+    for j, value in enumerate(row):
+        cell = ws.cell(row=start_row + i, column=j + 1, value=value)
+        if i == 0:
+            cell.font = header_font
+            cell.fill = purple_fill
+        cell.alignment = center
 
-    reporte_departamentos = df_filtrado.groupby(['Dirección', 'Sucursal']).size().reset_index(name='Cursos_Pendientes')
+# Tabla de áreas
+area_data = [
+    ["Área", "Pendientes"],
+    ["Operaciones Emisión", 1],
+    ["Sistemas Desarrollo SEL", 1],
+    ["Operaciones Autos Golfo", 1],
+    ["Administración de Emisión", 1],
+    ["Operaciones Centro de Contacto", 1],
+    ["Otra área", 1]
+]
 
-    st.subheader("Cursos pendientes por Departamento (Sucursal)")
-    st.dataframe(reporte_departamentos, use_container_width=True)
+start_row_area = 12
+ws.cell(row=start_row_area, column=1, value="Cursos Pendientes por Área").font = bold_font
 
-    st.subheader("Visualización")
-    st.bar_chart(reporte_departamentos.set_index('Sucursal')['Cursos_Pendientes'])
+for i, row in enumerate(area_data):
+    for j, value in enumerate(row):
+        cell = ws.cell(row=start_row_area + 1 + i, column=j + 1, value=value)
+        if i == 0:
+            cell.font = header_font
+            cell.fill = purple_fill
+        cell.alignment = center
 
-else:
-    st.info("Por favor sube un archivo Excel para continuar.")
+# Ajustes finales
+ws.column_dimensions["A"].width = 40
+ws.column_dimensions["B"].width = 20
+ws.column_dimensions["C"].width = 20
+ws.column_dimensions["F"].width = 25
+
+# Guardar archivo
+excel_path = "/mnt/data/Reporte_Visual_Direccion_Operaciones.xlsx"
+wb.save(excel_path)
+
+excel_path

@@ -26,13 +26,13 @@ if archivo is not None:
     departamentos_disponibles = df['Dirección'].dropna().unique()
     departamento_objetivo = st.selectbox("Selecciona una Dirección a analizar:", sorted(departamentos_disponibles))
 
-    df_filtrado = df[
-        (df['Dirección'].str.upper() == departamento_objetivo.upper()) &
-        (~df['Estado_Expediente'].str.upper().isin(["TERMINADO", "CONCLUIDO"]))
-    ]
+    df_total = df[df['Dirección'].str.upper() == departamento_objetivo.upper()]
+    df_filtrado = df_total[~df_total['Estado_Expediente'].str.upper().isin(["TERMINADO", "CONCLUIDO"])]
 
     st.subheader(f"Resumen general para: {departamento_objetivo}")
-    st.metric(label="Total de cursos pendientes", value=df_filtrado.shape[0])
+    col1, col2 = st.columns(2)
+    col1.metric(label="📋 Total de cursos registrados", value=df_total.shape[0])
+    col2.metric(label="⏳ Cursos no concluidos", value=df_filtrado.shape[0])
 
     reporte_departamentos = df_filtrado.groupby(['Dirección', 'Sucursal']).size().reset_index(name='Cursos_Pendientes')
     st.subheader("Cursos pendientes por Departamento (Sucursal)")
@@ -41,7 +41,6 @@ if archivo is not None:
     st.subheader("Visualización por Departamento")
     st.bar_chart(reporte_departamentos.set_index('Sucursal')['Cursos_Pendientes'])
 
-    # === Nuevo Reporte por Curso ===
     st.subheader("Resumen de Cursos Pendientes")
     reporte_cursos = df_filtrado.groupby('Curso').size().reset_index(name='Total_Pendientes')
     st.dataframe(reporte_cursos, use_container_width=True)

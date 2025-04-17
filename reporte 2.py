@@ -45,6 +45,13 @@ if archivo is not None:
     reporte_cursos = df_filtrado.groupby('Curso').size().reset_index(name='Total_Pendientes')
     st.dataframe(reporte_cursos, use_container_width=True)
     st.bar_chart(reporte_cursos.set_index('Curso')['Total_Pendientes'])
+    # === Nuevo: Detalle por colaborador y curso pendiente ===
+    st.subheader("🔎 Empleados con Cursos Pendientes por Departamento")
+
+    detalle_pendientes = df_filtrado[['Sucursal', 'Nombre_Colaborador', 'Curso', 'Estado_Expediente']]
+    detalle_pendientes = detalle_pendientes.sort_values(by=['Sucursal', 'Nombre_Colaborador', 'Curso'])
+
+    st.dataframe(detalle_pendientes, use_container_width=True)
 
 else:
     st.info("Por favor sube un archivo Excel para continuar.")

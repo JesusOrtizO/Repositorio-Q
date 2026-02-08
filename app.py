@@ -9,7 +9,7 @@ from typing import Dict, List, Optional, Tuple
 import pandas as pd
 import streamlit as st
 
-from reporte import crear_reporte_excel
+from reporte_excel import crear_reporte_excel
 
 st.set_page_config(page_title="Reporte de Cursos", layout="wide")
 st.title("📊 Reporte de Cursos por Dirección / Departamento")

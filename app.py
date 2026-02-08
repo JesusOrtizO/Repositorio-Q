@@ -13,6 +13,8 @@ from reporte import crear_reporte_excel
 
 st.set_page_config(page_title="Reporte de Cursos", layout="wide")
 st.title("📊 Reporte de Cursos por Dirección / Departamento")
+st.write("✅ App inició correctamente")
+st.stop()
 
 # Estados cumplidos (normalizados sin acentos)
 ESTADOS_CUMPLIDOS = {"TERMINADO", "CONCLUIDO", "EXENCION"}
